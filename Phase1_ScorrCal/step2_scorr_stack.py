@@ -29,7 +29,6 @@ def get_SCF(sta, Begin_Date, End_Date):
 
     Total_Hour = int((End_Date.timestamp - Begin_Date.timestamp)/3600)  
     en, ez, nz = [], [], []
-    Dates = []
     for i in range(Total_Hour):
         ind = str(UTCDateTime(Begin_Date) + i * 3600)[0:19]
         scffile = glob(join(sta, f"*{ind}*"))[0]
@@ -42,8 +41,7 @@ def get_SCF(sta, Begin_Date, End_Date):
         en.append(sub_en)
         ez.append(sub_ez)
         nz.append(sub_nz)
-        Dates.append(ind)
-    return en, ez, nz, Dates
+    return en, ez, nz
 
 wave_dir = "../data/scorr"
 out_dir = "../data/scorr_npz"
@@ -67,7 +65,7 @@ for net in nets[:]:
             scf_sta = join(wave_dir, ntnm, stnm)
 
             # Get the SC from the h5 files
-            en, ez, nz, Dates = get_SCF(scf_sta, Begin_Date, End_Date)
+            en, ez, nz = get_SCF(scf_sta, Begin_Date, End_Date)
 
             # Apply the Wiener Filter
             Wiener_en = wiener_filter(en, SVD_N=10)
@@ -76,7 +74,7 @@ for net in nets[:]:
 
             npz_file = f"{ntnm}.{stnm}.npz"
 
-            np.savez(join(out_dir, npz_file), en=en, ez=ez, nz=nz, Dates=Dates, Wiener_ez=Wiener_ez, Wiener_en=Wiener_en, Wiener_nz=Wiener_nz)
+            np.savez(join(out_dir, npz_file), en=en, ez=ez, nz=nz, Wiener_ez=Wiener_ez, Wiener_en=Wiener_en, Wiener_nz=Wiener_nz)
             
             print("-"*10)
             print(f"{ntnm} {stnm} End Processing!")
